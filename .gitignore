@@ -1,4 +1,10 @@
+.idea/
+.vscode/
+
+.python-version
+
 # Byte-compiled / optimized / DLL files
+*cache*
 __pycache__/
 *.py[cod]
 *$py.class
