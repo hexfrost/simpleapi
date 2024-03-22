@@ -1,123 +1,208 @@
 from typing import List
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter as FastAPIRouter
+from fastapi.responses import JSONResponse
 
 
-def register_routers(app: FastAPI, routers: List[APIRouter]) -> FastAPI:
-    for router in routers:
-        app.include_router(router)
-    return app
-
-
-class BaseInterface:
-
-    def __init__(self, router: APIRouter, prefix: str, tags: List[str] = None):
-        self.router = self.r = router or APIRouter()
-        self.prefix = self.p = self._normalize_router_prefix(prefix)
-        self.tags = self.t = tags or []
+class APIErrors:
 
     @staticmethod
-    def _normalize_router_prefix(string: str) -> str:
-        string = string[:-1] if string[-1] == "/" else string
-        string = string[1:] if string[0] == "/" else string
-        return f"/{string}"
+    def _405():
+        return JSONResponse(
+            status_code=405,
+            content={"message": "Method Not Allowed"},
+        )
 
 
-class GetInterface(BaseInterface):
+class AbstractPathStyle:
+    PATHS = {
+        "OPTIONS": "/{id}",
+        "HEAD": "/{id}",
+        "DELETE": "/{id}",
+        "PATCH": "/{id}",
+        "PUT": "/{id}",
+        "POST": "/{id}",
+        "GET": "/{id}",
+    }
+
+
+class DjangoPathStyle:
+    pass
+
+
+class UserFrendlyPathStyle:
+    PATHS = {
+        "OPTIONS": "/{id}/options",
+        "HEAD": "/{id}/head",
+        "DELETE": "/{id}/delete",
+        "PATCH": "/{id}/edit",
+        "PUT": "/{id}/edit",
+        "POST": "/{id}/create",
+        "GET": "/list",
+    }
+
+
+class EndpointsRegister:
+
+    def __init__(self, app, endpoints: List["BaseEndpoint"]):
+        for endpoint in endpoints:
+            prefix = endpoint.PREFIX
+            tags = endpoint.TAGS
+            methods = endpoint.methods
+            print(methods)
+            router = FastAPIRouter(prefix=prefix, tags=tags)
+            for http_method in methods:
+                path = endpoint.paths[http_method.lower()]
+                method = getattr(endpoint, http_method.lower())
+                router.add_api_route(methods=[http_method], path=path, endpoint=method)
+            app.include_router(router)
+
+
+class AbstractEndpoint:
+    PREFIX: str = None
+    TAGS: List[str] = None
+
+
+class BaseEndpoint:
+
+    def __init__(self, *args, **kwargs):
+        self.methods = []
+        self.paths = kwargs.get("paths", UserFrendlyPathStyle).PATHS
+
+    def set_paths(self, paths_stype: "AbstractPathStyle"):
+        self.paths = paths_stype.PATHS
+
+
+class GetEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("GET")
 
     def _get(self, *args, **kwargs):
         raise NotImplementedError
 
     def get(self, *args, **kwargs):
-        return self.router.get(prefix=f"{self.p}", tags=self.t)(self._get)(*args, **kwargs)
+        return self._get(*args, **kwargs)
 
 
-class PostInterface(BaseInterface):
+class PostEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("POST")
 
     def _post(self, *args, **kwargs):
         raise NotImplementedError
 
     def post(self, *args, **kwargs):
-        return self.router.post(prefix=f"{self.p}", tags=self.t)(self._post)(*args, **kwargs)
+        return self._post(*args, **kwargs)
 
 
-class PatchInterface(BaseInterface):
+class PatchEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("PATCH")
 
     def _patch(self, *args, **kwargs):
         raise NotImplementedError
 
     def patch(self, *args, **kwargs):
-        return self.router.patch(prefix=f"{self.p}", tags=self.t)(self._patch)(*args, **kwargs)
+        return self.patch(*args, **kwargs)
 
 
-class PutInterface(BaseInterface):
+class PutEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("PUT")
 
     def _put(self, *args, **kwargs):
         raise NotImplementedError
 
     def put(self, *args, **kwargs):
-        return self.router.put(prefix=f"{self.p}", tags=self.t)(self._put)(*args, **kwargs)
+        return self._put(*args, **kwargs)
 
 
-class DeleteInterface(BaseInterface):
+class DeleteEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("DELETE")
 
     def _delete(self, *args, **kwargs):
         raise NotImplementedError
 
     def delete(self, *args, **kwargs):
-        return self.router.delete(prefix=f"{self.p}", tags=self.t)(self._delete)(*args, **kwargs)
+        return self._delete(*args, **kwargs)
 
 
-class OptionsInterface(BaseInterface):
+class OptionsEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("OPTIONS")
 
     def _options(self, *args, **kwargs):
         raise NotImplementedError
 
     def options(self, *args, **kwargs):
-        return self.router.options(prefix=f"{self.p}", tags=self.t)(self._options)(*args, **kwargs)
+        return self._options(*args, **kwargs)
 
 
-class HeadInterface(BaseInterface):
+class HeadEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("HEAD")
 
     def _head(self, *args, **kwargs):
         raise NotImplementedError
 
     def head(self, *args, **kwargs):
-        return self.router.head(prefix=f"{self.p}", tags=self.t)(self._head)(*args, **kwargs)
+        return self._head(*args, **kwargs)
 
 
-class TraceInterfaces(BaseInterface):
+class TraceEndpoints(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("TRACE")
 
     def _trace(self, *args, **kwargs):
         raise NotImplementedError
 
     def trace(self, *args, **kwargs):
-        return self.router.trace(prefix=f"{self.p}", tags=self.t)(self._trace)(*args, **kwargs)
+        return self._trace(*args, **kwargs)
 
 
-class ConnectInterface(BaseInterface):
+class ConnectEndpoint(BaseEndpoint):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.methods.append("CONNECT")
 
     def _connect(self, *args, **kwargs):
         raise NotImplementedError
 
     def connect(self, *args, **kwargs):
-        # return self.router.connect(prefix=f"{self.rn}", tags=self.t)(self._connect)(*args, **kwargs)
         pass
 
 
-class AbstractEndpoint(
-    GetInterface,
-    PostInterface,
-    PutInterface,
-    PatchInterface,
-    DeleteInterface,
-    HeadInterface,
-    OptionsInterface,
+class AbstractRouter(
+    GetEndpoint,
+    PostEndpoint,
+    PutEndpoint,
+    PatchEndpoint,
+    DeleteEndpoint,
+    HeadEndpoint,
+    OptionsEndpoint,
 ):
     pass
 
 
-class BaseWebhook(PostInterface, HeadInterface, OptionsInterface):
+class BaseWebhook(PostEndpoint, HeadEndpoint, OptionsEndpoint):
     pass
 
 
