@@ -33,6 +33,7 @@ class GetInterface(BaseInterface):
 
 
 class PostInterface(BaseInterface):
+
     def _post(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -41,6 +42,7 @@ class PostInterface(BaseInterface):
 
 
 class PatchInterface(BaseInterface):
+
     def _patch(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -49,6 +51,7 @@ class PatchInterface(BaseInterface):
 
 
 class PutInterface(BaseInterface):
+
     def _put(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -57,6 +60,7 @@ class PutInterface(BaseInterface):
 
 
 class DeleteInterface(BaseInterface):
+
     def _delete(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -65,6 +69,7 @@ class DeleteInterface(BaseInterface):
 
 
 class OptionsInterface(BaseInterface):
+
     def _options(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -73,6 +78,7 @@ class OptionsInterface(BaseInterface):
 
 
 class HeadInterface(BaseInterface):
+
     def _head(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -81,6 +87,7 @@ class HeadInterface(BaseInterface):
 
 
 class TraceInterfaces(BaseInterface):
+
     def _trace(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -89,6 +96,7 @@ class TraceInterfaces(BaseInterface):
 
 
 class ConnectInterface(BaseInterface):
+
     def _connect(self, *args, **kwargs):
         raise NotImplementedError
 
