@@ -27,7 +27,15 @@ class AbstractPathStyle:
 
 
 class DjangoPathStyle:
-    pass
+    PATHS = {
+        "OPTIONS": "/{pk}",
+        "HEAD": "/{pk}",
+        "DELETE": "/{pk}",
+        "PATCH": "/{pk}",
+        "PUT": "/{pk}",
+        "POST": "/{pk}",
+        "GET": "/{pk}",
+    }
 
 
 class UserFrendlyPathStyle:
@@ -37,7 +45,7 @@ class UserFrendlyPathStyle:
         "DELETE": "/{id}/delete",
         "PATCH": "/{id}/edit",
         "PUT": "/{id}/edit",
-        "POST": "/{id}/create",
+        "POST": "/create",
         "GET": "/list",
     }
 
@@ -52,7 +60,7 @@ class EndpointsRegister:
             print(methods)
             router = FastAPIRouter(prefix=prefix, tags=tags)
             for http_method in methods:
-                path = endpoint.paths[http_method.lower()]
+                path = endpoint.paths[http_method]
                 method = getattr(endpoint, http_method.lower())
                 router.add_api_route(methods=[http_method], path=path, endpoint=method)
             app.include_router(router)
