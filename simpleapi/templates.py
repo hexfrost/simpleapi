@@ -36,9 +36,7 @@ class PostInterface(BaseInterface):
         raise NotImplementedError
 
     def post(self, *args, **kwargs):
-        return self.router.post(prefix=f"{self.rn}", tags=self.tags)(self._post)(
-            *args, **kwargs
-        )
+        return self.router.post(prefix=f"{self.rn}", tags=self.tags)(self._post)(*args, **kwargs)
 
 
 class PatchInterface(BaseInterface):
@@ -46,9 +44,7 @@ class PatchInterface(BaseInterface):
         raise NotImplementedError
 
     def patch(self, *args, **kwargs):
-        return self.router.patch(prefix=f"{self.rn}", tags=self.tags)(self._patch)(
-            *args, **kwargs
-        )
+        return self.router.patch(prefix=f"{self.rn}", tags=self.tags)(self._patch)(*args, **kwargs)
 
 
 class PutInterface(BaseInterface):
@@ -56,9 +52,7 @@ class PutInterface(BaseInterface):
         raise NotImplementedError
 
     def put(self, *args, **kwargs):
-        return self.router.put(prefix=f"{self.rn}", tags=self.tags)(self._put)(
-            *args, **kwargs
-        )
+        return self.router.put(prefix=f"{self.rn}", tags=self.tags)(self._put)(*args, **kwargs)
 
 
 class DeleteInterface(BaseInterface):
@@ -66,9 +60,7 @@ class DeleteInterface(BaseInterface):
         raise NotImplementedError
 
     def delete(self, *args, **kwargs):
-        return self.router.delete(prefix=f"{self.rn}", tags=self.tags)(self._delete)(
-            *args, **kwargs
-        )
+        return self.router.delete(prefix=f"{self.rn}", tags=self.tags)(self._delete)(*args, **kwargs)
 
 
 class OptionsInterface(BaseInterface):
@@ -76,9 +68,7 @@ class OptionsInterface(BaseInterface):
         raise NotImplementedError
 
     def options(self, *args, **kwargs):
-        return self.router.options(prefix=f"{self.rn}", tags=self.tags)(self._options)(
-            *args, **kwargs
-        )
+        return self.router.options(prefix=f"{self.rn}", tags=self.tags)(self._options)(*args, **kwargs)
 
 
 class HeadInterface(BaseInterface):
@@ -86,9 +76,7 @@ class HeadInterface(BaseInterface):
         raise NotImplementedError
 
     def head(self, *args, **kwargs):
-        return self.router.head(prefix=f"{self.rn}", tags=self.tags)(self._head)(
-            *args, **kwargs
-        )
+        return self.router.head(prefix=f"{self.rn}", tags=self.tags)(self._head)(*args, **kwargs)
 
 
 class TraceInterfaces(BaseInterface):
@@ -96,9 +84,7 @@ class TraceInterfaces(BaseInterface):
         raise NotImplementedError
 
     def trace(self, *args, **kwargs):
-        return self.router.trace(prefix=f"{self.rn}", tags=self.tags)(self._trace)(
-            *args, **kwargs
-        )
+        return self.router.trace(prefix=f"{self.rn}", tags=self.tags)(self._trace)(*args, **kwargs)
 
 
 class ConnectInterface(BaseInterface):
