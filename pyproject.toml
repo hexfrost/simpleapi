@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hexfrost-simpleapi"
-version = "0.1.0"
+version = "0.1.6"
 description = "Library for simple creating endpoints"
 authors = ["Kaziamov <kaziamov@outlook.com>"]
 packages = [
@@ -8,10 +8,9 @@ packages = [
 ]
 readme = "README.md"
 
-
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.110.0"
+fastapi = ">=0.70.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.0.0"

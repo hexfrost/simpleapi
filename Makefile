@@ -1,4 +1,5 @@
 build:
+	rm ./dist/simpleapi-* && \
 	poetry build
 publish:
 	poetry publish --dry-run
