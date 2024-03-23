@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "simpleapi"
+name = "hexfrost-simpleapi"
 version = "0.1.6"
 description = "Library for simple creating endpoints"
 authors = ["Kaziamov <kaziamov@outlook.com>"]
