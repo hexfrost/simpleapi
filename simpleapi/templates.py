@@ -3,6 +3,16 @@ from typing import List
 from fastapi import APIRouter as FastAPIRouter
 from fastapi.responses import JSONResponse
 
+HTTP_GET = "GET"
+HTTP_POST = "POST"
+HTTP_PUT = "PUT"
+HTTP_PATCH = "PATCH"
+HTTP_DELETE = "DELETE"
+HTTP_HEAD = "HEAD"
+HTTP_OPTIONS = "OPTIONS"
+HTTP_TRACE = "TRACE"
+HTTP_CONNECT = "CONNECT"
+
 
 class APIErrors:
 
@@ -16,11 +26,11 @@ class APIErrors:
 
 class AbstractPathStyle:
     PATHS = {
-        "OPTIONS": "/{id}",
-        "HEAD": "/{id}",
-        "DELETE": "/{id}",
-        "PATCH": "/{id}",
-        "PUT": "/{id}",
+        HTTP_OPTIONS: "/{id}",
+        HTTP_HEAD: "/{id}",
+        HTTP_DELETE: "/{id}",
+        HTTP_PATCH: "/{id}",
+        HTTP_PUT: "/{id}",
         "POST": "/{id}",
         "GET": "/{id}",
     }
@@ -28,31 +38,31 @@ class AbstractPathStyle:
 
 class DjangoPathStyle:
     PATHS = {
-        "OPTIONS": "/{pk}",
-        "HEAD": "/{pk}",
-        "DELETE": "/{pk}",
-        "PATCH": "/{pk}",
-        "PUT": "/{pk}",
+        HTTP_OPTIONS: "/{pk}",
+        HTTP_HEAD: "/{pk}",
+        HTTP_DELETE: "/{pk}",
+        HTTP_PATCH: "/{pk}",
+        HTTP_PUT: "/{pk}",
         "POST": "/{pk}",
-        "GET": "/{pk}",
+        HTTP_GET: "/{pk}",
     }
 
 
 class UserFrendlyPathStyle:
     PATHS = {
-        "OPTIONS": "/{id}/options",
-        "HEAD": "/{id}/head",
-        "DELETE": "/{id}/delete",
-        "PATCH": "/{id}/edit",
-        "PUT": "/{id}/edit",
-        "POST": "/create",
-        "GET": "/list",
+        HTTP_OPTIONS: "/{id}/options",
+        HTTP_HEAD: "/{id}/head",
+        HTTP_DELETE: "/{id}/delete",
+        HTTP_PATCH: "/{id}/edit",
+        HTTP_PUT: "/{id}/edit",
+        HTTP_POST: "/create",
+        HTTP_GET: "/list",
     }
 
 
 class EndpointsRegister:
 
-    def __init__(self, app, endpoints: List["BaseEndpoint"]):
+    def __init__(self, app, endpoints: List["BaseEndpoint"], generate_head: bool = True, generate_options: bool = True):
         for endpoint in endpoints:
             prefix = endpoint.PREFIX
             tags = endpoint.TAGS
@@ -63,6 +73,10 @@ class EndpointsRegister:
                 path = endpoint.paths[http_method]
                 method = getattr(endpoint, http_method.lower())
                 router.add_api_route(methods=[http_method], path=path, endpoint=method)
+                if generate_head:
+                    router.add_api_route(methods=[HTTP_HEAD], path=path, endpoint=method, include_in_schema=False)
+                if generate_options:
+                    router.add_api_route(methods=[HTTP_OPTIONS], path=path, endpoint=method, include_in_schema=False)
             app.include_router(router)
 
 
@@ -70,22 +84,34 @@ class AbstractEndpoint:
     PREFIX: str = None
     TAGS: List[str] = None
 
-
-class BaseEndpoint:
-
     def __init__(self, *args, **kwargs):
         self.methods = []
         self.paths = kwargs.get("paths", UserFrendlyPathStyle).PATHS
+
+    def _get_http_method(self):
+        raise NotImplementedError
+
+    def _get_content_type(self):
+        raise NotImplementedError
 
     def set_paths(self, paths_stype: "AbstractPathStyle"):
         self.paths = paths_stype.PATHS
 
 
-class GetEndpoint(BaseEndpoint):
+class BaseEndpoint(AbstractEndpoint):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.methods.append("GET")
+        self.methods.append(self._get_http_method())
+
+    def _get_content_type(self):
+        return JSONResponse.media_type
+
+
+class GetEndpoint(BaseEndpoint):
+
+    def _get_http_method(self):
+        return HTTP_GET
 
     def _get(self, *args, **kwargs):
         raise NotImplementedError
@@ -96,9 +122,8 @@ class GetEndpoint(BaseEndpoint):
 
 class PostEndpoint(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("POST")
+    def _get_http_method(self):
+        return HTTP_POST
 
     def _post(self, *args, **kwargs):
         raise NotImplementedError
@@ -109,9 +134,8 @@ class PostEndpoint(BaseEndpoint):
 
 class PatchEndpoint(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("PATCH")
+    def _get_http_method(self):
+        return HTTP_PATCH
 
     def _patch(self, *args, **kwargs):
         raise NotImplementedError
@@ -122,9 +146,8 @@ class PatchEndpoint(BaseEndpoint):
 
 class PutEndpoint(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("PUT")
+    def _get_http_method(self):
+        return HTTP_PUT
 
     def _put(self, *args, **kwargs):
         raise NotImplementedError
@@ -135,9 +158,8 @@ class PutEndpoint(BaseEndpoint):
 
 class DeleteEndpoint(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("DELETE")
+    def _get_http_method(self):
+        return HTTP_DELETE
 
     def _delete(self, *args, **kwargs):
         raise NotImplementedError
@@ -148,9 +170,8 @@ class DeleteEndpoint(BaseEndpoint):
 
 class OptionsEndpoint(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("OPTIONS")
+    def _get_http_method(self):
+        return HTTP_OPTIONS
 
     def _options(self, *args, **kwargs):
         raise NotImplementedError
@@ -161,9 +182,8 @@ class OptionsEndpoint(BaseEndpoint):
 
 class HeadEndpoint(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("HEAD")
+    def _get_http_method(self):
+        return HTTP_HEAD
 
     def _head(self, *args, **kwargs):
         raise NotImplementedError
@@ -174,28 +194,14 @@ class HeadEndpoint(BaseEndpoint):
 
 class TraceEndpoints(BaseEndpoint):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("TRACE")
+    def _get_http_method(self):
+        return HTTP_TRACE
 
     def _trace(self, *args, **kwargs):
         raise NotImplementedError
 
     def trace(self, *args, **kwargs):
         return self._trace(*args, **kwargs)
-
-
-class ConnectEndpoint(BaseEndpoint):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.methods.append("CONNECT")
-
-    def _connect(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def connect(self, *args, **kwargs):
-        pass
 
 
 class AbstractRouter(
@@ -211,8 +217,4 @@ class AbstractRouter(
 
 
 class BaseWebhook(PostEndpoint, HeadEndpoint, OptionsEndpoint):
-    pass
-
-
-class BaseEndpoint(AbstractEndpoint):
     pass
